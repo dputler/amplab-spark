@@ -911,6 +911,18 @@ setMethod("selectExpr",
             dataFrame(sdf)
           })
 
+#' @rdname selectExpr
+#' @export
+setMethod("selectExpr",
+          signature(x = "DataFrame", expr = "list"),
+          function(x, expr) {
+            if (!all(sapply(expr, inherits, "character"))) {
+              stop("expr must be a list of character vectors")
+            }
+            sdf <- callJMethod(x@sdf, "selectExpr", listToSeq(expr))
+            dataFrame(sdf)
+          })
+
 #' WithColumn
 #'
 #' Return a new DataFrame with the specified column added.
