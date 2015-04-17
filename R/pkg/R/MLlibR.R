@@ -27,7 +27,7 @@ dfToLabeledPoints <- function(df) {
   if (class(df) != "DataFrame") {
     stop("The provided argument is not a Spark DataFrame.")
   }
-  lp <- SparkR:::callJStatic("org.apache.spark.mllib.api.r", "dfToLabeledPoints", df@sdf)
+  lp <- SparkR:::callJStatic("org.apache.spark.mllib.api.r.MLlibR", "dfToLabeledPoints", df@sdf)
   lp
 }
 
@@ -38,7 +38,7 @@ dfToIdPoints <- function(df) {
   if (class(df) != "DataFrame") {
     stop("The provided argument is not a Spark DataFrame.")
   }
-  ip <- SparkR:::callJStatic("org.apache.spark.mllib.api.r", "dfToIdPoints", df@sdf)
+  ip <- SparkR:::callJStatic("org.apache.spark.mllib.api.r.MLlibR", "dfToIdPoints", df@sdf)
   ip
 }
 
@@ -115,7 +115,7 @@ linearRegressionWithSGD <- function(formula,
   # Get the model call
   the_call <- match.call()
   # Estimate the model
-  the_model <- SparkR:::callJStatic("org.apache.spark.mllib.api.r",
+  the_model <- SparkR:::callJStatic("org.apache.spark.mllib.api.r.MLlibR",
                                     "trainLinearRegressionWithSGD",
                                     estLP,
                                     iter,
@@ -197,7 +197,7 @@ logisticRegressionWithLBFGS <- function(formula,
   }
   start_vals <- as.list(as.numeric(start_vals))
   use_intercept <- pf[[2]]
-  the_model <- SparkR:::callJStatic("org.apache.spark.mllib.api.r",
+  the_model <- SparkR:::callJStatic("org.apache.spark.mllib.api.r.MLlibR",
                                     "trainLogisticRegressionModelWithLBFGS",
                                     estLP,
                                     iter,
@@ -274,7 +274,7 @@ decisionTree <- function(formula,
   estLP <- dfToLabeledPoints(estDF)
   callJMethod(estLP, "cache")
   if (modType == "classification") {
-    the_model <- SparkR:::callJStatic("org.apache.spark.mllib.api.r",
+    the_model <- SparkR:::callJStatic("org.apache.spark.mllib.api.r.MLlibR",
                                       "trainClassificationTree",
                                       estLP,
                                       nclasses,
@@ -282,7 +282,7 @@ decisionTree <- function(formula,
                                       maxDepth,
                                       maxBins)
   } else {
-    the_model <- SparkR:::callJStatic("org.apache.spark.mllib.api.r",
+    the_model <- SparkR:::callJStatic("org.apache.spark.mllib.api.r.MLlibR",
                                       "trainRegressionTree",
                                       estLP,
                                       impurity,
@@ -318,13 +318,13 @@ scoresLabels <- function(model, labeled_points, threshold = 0.5) {
     stop("The provided labeled_points is not a jobj.")
   }
   if (getJClassName(model) %in% c("LogisticRegressionModel")) {
-    sl <- SparkR:::callJStatic("org.apache.spark.mllib.api.r",
+    sl <- SparkR:::callJStatic("org.apache.spark.mllib.api.r.MLlibR",
                                "ScoresLabels",
                                model,
                                labeled_points,
                                threshold)
   } else {
-    sl <- SparkR:::callJStatic("org.apache.spark.mllib.api.r",
+    sl <- SparkR:::callJStatic("org.apache.spark.mllib.api.r.MLlibR",
                                "ScoresLabels",
                                model,
                                labeled_points)
@@ -338,7 +338,7 @@ binaryConfusionMatrix <- function(sl) {
   if (class(sl) != "RDD") {
     stop("The provided argument is not a reference to a RDD.")
   }
-  cml <- SparkR:::callJStatic("org.apache.spark.mllib.api.r",
+  cml <- SparkR:::callJStatic("org.apache.spark.mllib.api.r.MLlibR",
                               "binaryConfusionMatrix",
                               sl@jrdd)
   cm <- matrix(unlist(cml), ncol = 2, nrow = 2, byrow = TRUE, dimnames = list(c("Actual 0", "Actual 1"), c("Predicted 0", "Predicted 1")))
@@ -350,7 +350,7 @@ binaryClassificationDeviance <- function(slProb) {
   if (class(slProb) != "RDD") {
     stop("The provided argument is not a reference to a RDD.")
   }
-  devs <- SparkR:::callJStatic("org.apache.spark.mllib.api.r",
+  devs <- SparkR:::callJStatic("org.apache.spark.mllib.api.r.MLlibR",
                               "binaryClassificationDeviance",
                               slProb@jrdd)
   unlist(devs)
@@ -359,14 +359,14 @@ binaryClassificationDeviance <- function(slProb) {
 # A function to calculate the misclassification rate of a binary classification
 # model
 misClassRate <- function(score_label) {
-  SparkR:::callJStatic("org.apache.spark.mllib.api.r",
+  SparkR:::callJStatic("org.apache.spark.mllib.api.r.MLlibR",
                         "misClassRate",
                         score_label@jrdd)
 }
 
 # A function to extract the model coefficients from a MLlib regression model
 getCoefs <- function(mod_obj) {
-  coefs <- SparkR:::callJStatic("org.apache.spark.mllib.api.r",
+  coefs <- SparkR:::callJStatic("org.apache.spark.mllib.api.r.MLlibR",
                                 "getCoefs",
                                 mod_obj$Model)
   unlist(coefs)
@@ -378,7 +378,7 @@ BinaryClassificationMetrics <- function(sl) {
   if (class(sl) != "RDD") {
     stop("The provided argument is not a reference to a RDD.")
   }
-  SparkR:::callJStatic("org.apache.spark.mllib.api.r",
+  SparkR:::callJStatic("org.apache.spark.mllib.api.r.MLlibR",
                         "BCMetrics",
                         sl@jrdd)
 }
@@ -495,7 +495,7 @@ idScore.LinearRegressionModel <- function(model, id, df, sqlCtx) {
   scoreDF <- model.matrix(df, fields, id)
   scoreIP <- dfToIdPoints(scoreDF)
   SparkR:::callJMethod(scoreIP,"cache")
-  scores <- SparkR:::callJStatic("org.apache.spark.mllib.api.r",
+  scores <- SparkR:::callJStatic("org.apache.spark.mllib.api.r.MLlibR",
                                 "IdScore",
                                 model$Model,
                                 scoreIP,
@@ -517,7 +517,7 @@ idScore.LogisticRegressionModel <- function(model, id, df, sqlCtx) {
   scoreDF <- model.matrix(df, fields, id)
   scoreIP <- dfToIdPoints(scoreDF)
   SparkR:::callJMethod(scoreIP, "cache")
-  scores <- SparkR:::callJStatic("org.apache.spark.mllib.api.r",
+  scores <- SparkR:::callJStatic("org.apache.spark.mllib.api.r.MLlibR",
                                 "IdScore",
                                 model$Model,
                                 scoreIP,
@@ -537,7 +537,7 @@ idScore.DecisionTreeModel <- function(model, id, df, sqlCtx) {
   scoreDF <- select(df, fields)
   scoreIP <- dfToIdPoints(scoreDF)
   SparkR:::callJMethod(scoreIP,"cache")
-  scores <- SparkR:::callJStatic("org.apache.spark.mllib.api.r",
+  scores <- SparkR:::callJStatic("org.apache.spark.mllib.api.r.MLlibR",
                                 "IdScore",
                                 model$Model,
                                 scoreIP,
