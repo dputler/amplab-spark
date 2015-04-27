@@ -30,3 +30,11 @@ EOT
 ```bash
 cp /etc/hive/conf/hive-site.xml /home/cloudera/sparkR/conf/hive-site.xml
 ```
+
+##(Optional) Disable default Spark service from running at startup
+The following commands will disable the default cloudera settings that will spin up Spark 1.2 at startup. This isn't strictly necessary, but there could be some complications from running two versions of Spark in parallel.
+```bash
+sudo chkconfig spark-history-server off
+sudo chkconfig spark-master off
+sudo chkconfig spark-worker off
+```
