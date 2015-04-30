@@ -7,6 +7,7 @@
 setMethod("model.matrix",
           signature(object = "DataFrame"),
           function (object, vars, id = NULL) {
+            target <- vars[[1]]
             # Identify all string fields in the formula and pull them out of the df
             if (is.null(id)) {
               stringVars <- lapply(Filter(function(x) x[[2]] == "string",
@@ -27,8 +28,13 @@ setMethod("model.matrix",
             catDummies <- unlist(lapply(varLevels, function(level) {
               explodeField(level$fieldName, level$levels)  
             }), recursive = FALSE)
-            explodedDF <- selectExpr(object, union(otherVars, catDummies))              
-            dfOut <- castAll(explodedDF, "double", id)
+            explodedDF <- selectExpr(object, union(otherVars, catDummies))
+            allFields <- names(explodedDF)
+            targetField <- grep(target, allFields, value = TRUE)
+            fieldOrder <- as.list(c(targetField, allFields[allFields != targetField]))
+            # dfOut <- castAll(explodedDF, "double", id)
+            converted <- castAll(explodedDF, "double", id)
+            dfOut <- select(converted, fieldOrder)
           })
 
 getLevels <- function(df, field) {
